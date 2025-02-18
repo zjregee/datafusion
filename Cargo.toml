@@ -55,7 +55,7 @@ members = [
     "test-utils",
     "benchmarks",
     "datafusion/macros",
-    "datafusion/doc",
+    "datafusion/doc", "reading",
 ]
 resolver = "2"
 
