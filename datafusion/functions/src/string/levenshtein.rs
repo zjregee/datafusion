@@ -23,10 +23,13 @@ use arrow::datatypes::DataType;
 
 use crate::utils::{make_scalar_function, utf8_to_int_type};
 use datafusion_common::cast::{as_generic_string_array, as_string_view_array};
+use datafusion_common::types::logical_string;
 use datafusion_common::utils::datafusion_strsim;
 use datafusion_common::{exec_err, utils::take_function_args, Result};
-use datafusion_expr::{ColumnarValue, Documentation};
-use datafusion_expr::{ScalarFunctionArgs, ScalarUDFImpl, Signature, Volatility};
+use datafusion_expr::{
+    Coercion, ColumnarValue, Documentation, ScalarFunctionArgs, ScalarUDFImpl, Signature,
+    TypeSignatureClass, Volatility,
+};
 use datafusion_macros::user_doc;
 
 #[user_doc(
@@ -64,7 +67,13 @@ impl Default for LevenshteinFunc {
 impl LevenshteinFunc {
     pub fn new() -> Self {
         Self {
-            signature: Signature::string(2, Volatility::Immutable),
+            signature: Signature::coercible(
+                vec![
+                    Coercion::new_exact(TypeSignatureClass::Native(logical_string())),
+                    Coercion::new_exact(TypeSignatureClass::Native(logical_string())),
+                ],
+                Volatility::Immutable,
+            ),
         }
     }
 }

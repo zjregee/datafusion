@@ -15,21 +15,22 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::utils::make_scalar_function;
 use arrow::array::{Array, ArrayRef, AsArray};
 use arrow::compute::contains as arrow_contains;
 use arrow::datatypes::DataType;
 use arrow::datatypes::DataType::{Boolean, LargeUtf8, Utf8, Utf8View};
-use datafusion_common::exec_err;
-use datafusion_common::DataFusionError;
-use datafusion_common::Result;
-use datafusion_expr::{
-    ColumnarValue, Documentation, ScalarFunctionArgs, ScalarUDFImpl, Signature,
-    Volatility,
-};
-use datafusion_macros::user_doc;
 use std::any::Any;
 use std::sync::Arc;
+
+use crate::utils::make_scalar_function;
+use datafusion_common::exec_err;
+use datafusion_common::types::logical_string;
+use datafusion_common::{DataFusionError, Result};
+use datafusion_expr::{
+    Coercion, ColumnarValue, Documentation, ScalarFunctionArgs, ScalarUDFImpl, Signature,
+    TypeSignatureClass, Volatility,
+};
+use datafusion_macros::user_doc;
 
 #[user_doc(
     doc_section(label = "String Functions"),
@@ -60,7 +61,13 @@ impl Default for ContainsFunc {
 impl ContainsFunc {
     pub fn new() -> Self {
         Self {
-            signature: Signature::string(2, Volatility::Immutable),
+            signature: Signature::coercible(
+                vec![
+                    Coercion::new_exact(TypeSignatureClass::Native(logical_string())),
+                    Coercion::new_exact(TypeSignatureClass::Native(logical_string())),
+                ],
+                Volatility::Immutable,
+            ),
         }
     }
 }

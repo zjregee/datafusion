@@ -21,10 +21,13 @@ use std::any::Any;
 
 use crate::string::common::*;
 use crate::utils::{make_scalar_function, utf8_to_str_type};
+use datafusion_common::types::logical_string;
 use datafusion_common::{exec_err, Result};
 use datafusion_expr::function::Hint;
-use datafusion_expr::{ColumnarValue, Documentation, TypeSignature, Volatility};
-use datafusion_expr::{ScalarFunctionArgs, ScalarUDFImpl, Signature};
+use datafusion_expr::{
+    Coercion, ColumnarValue, Documentation, ScalarFunctionArgs, ScalarUDFImpl, Signature,
+    TypeSignature, TypeSignatureClass, Volatility,
+};
 use datafusion_macros::user_doc;
 
 /// Returns the longest string  with leading characters removed. If the characters are not specified, whitespace is removed.
@@ -76,7 +79,15 @@ impl LtrimFunc {
     pub fn new() -> Self {
         Self {
             signature: Signature::one_of(
-                vec![TypeSignature::String(2), TypeSignature::String(1)],
+                vec![
+                    TypeSignature::Coercible(vec![
+                        Coercion::new_exact(TypeSignatureClass::Native(logical_string())),
+                        Coercion::new_exact(TypeSignatureClass::Native(logical_string())),
+                    ]),
+                    TypeSignature::Coercible(vec![Coercion::new_exact(
+                        TypeSignatureClass::Native(logical_string()),
+                    )]),
+                ],
                 Volatility::Immutable,
             ),
         }

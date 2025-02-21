@@ -15,17 +15,19 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use std::any::Any;
-use std::sync::Arc;
-
-use crate::utils::{make_scalar_function, utf8_to_int_type};
 use arrow::array::{
     ArrayRef, ArrowPrimitiveType, AsArray, PrimitiveArray, StringArrayType,
 };
 use arrow::datatypes::{ArrowNativeType, DataType, Int32Type, Int64Type};
+use std::any::Any;
+use std::sync::Arc;
+
+use crate::utils::{make_scalar_function, utf8_to_int_type};
+use datafusion_common::types::logical_string;
 use datafusion_common::{exec_err, Result};
 use datafusion_expr::{
-    ColumnarValue, Documentation, ScalarUDFImpl, Signature, Volatility,
+    Coercion, ColumnarValue, Documentation, ScalarUDFImpl, Signature, TypeSignatureClass,
+    Volatility,
 };
 use datafusion_macros::user_doc;
 
@@ -60,7 +62,13 @@ impl Default for StrposFunc {
 impl StrposFunc {
     pub fn new() -> Self {
         Self {
-            signature: Signature::string(2, Volatility::Immutable),
+            signature: Signature::coercible(
+                vec![
+                    Coercion::new_exact(TypeSignatureClass::Native(logical_string())),
+                    Coercion::new_exact(TypeSignatureClass::Native(logical_string())),
+                ],
+                Volatility::Immutable,
+            ),
             aliases: vec![String::from("instr"), String::from("position")],
         }
     }
