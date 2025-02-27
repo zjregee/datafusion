@@ -1,0 +1,17 @@
+[package]
+name = "reading"
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+datafusion = { workspace = true }
+tokio = { version = "1.0", features = ["rt-multi-thread"] }
